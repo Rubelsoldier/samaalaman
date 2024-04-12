@@ -44,7 +44,6 @@ import {nextTick, ref} from "vue";
 //Uses
 const form = useForm({
     name: ''
-    // parent_id: null
 })
 
 //Refs
