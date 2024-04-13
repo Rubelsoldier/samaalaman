@@ -5,13 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreFolderRequest;
 
 class FileController extends Controller
 {
     public function myFiles() {
-        return Inertia::render('MyFiles');
+        
+        $folder = $this->getRoot();
+        $files = File::query()
+            ->where('parent_id',$folder->id)
+            ->where('created_by',Auth::id())
+            ->orderBy('is_folder','desc')
+            ->orderBy('created_at','desc')
+            ->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        return Inertia::render('MyFiles',compact('files'));
     }
 
     public function createFolder( StoreFolderRequest $request ) {
@@ -35,5 +47,4 @@ class FileController extends Controller
     {
         return File::query()->whereIsRoot()->where('created_by', Auth::id())->firstOrFail();
     }
-
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class ParentIdBaseRequest extends FormRequest
 {
@@ -18,15 +19,20 @@ class ParentIdBaseRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {        
-       
-        $this->parent = File::query()->where('id', $this->input('parent_id'))->first();
+{
+    // Retrieve the parent_id using $this->input('parent_id')
+    $this->parent = File::query()->where('id', $this->input('parent_id'))->first();
 
-        if ($this->parent && !$this->parent->isOwnedBy(Auth::id())) {
-            return false;
-        }
-        return true;
+    // Log both parent_id and Auth::id()
+    Log::info('Parent ID: ' . ($this->parent ? $this->parent->id : 'null'));
+    Log::info('Auth ID: ' . Auth::id());
+
+    if ($this->parent && !$this->parent->isOwnedBy(Auth::id())) {
+        return false;
     }
+    return true;
+}
+
 
     /**
      * Get the validation rules that apply to the request.

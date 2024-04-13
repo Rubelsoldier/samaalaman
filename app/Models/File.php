@@ -7,6 +7,7 @@ use Kalnoy\Nestedset\NodeTrait;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -46,4 +47,13 @@ class File extends Model
         });
 
     }
+
+    public function owner(): Attribute
+    {
+        return Attribute::make(
+            get: function(mixed $value, array $attributes) {
+                return $attributes['created_by'] === request()->user()->id ? "me" : $this->user->name;
+            }
+        );
+    }    
 }
