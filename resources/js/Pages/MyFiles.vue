@@ -19,7 +19,8 @@
             </thead>
             <tbody>
             <tr v-for="file of files.data" :key="file.id"
-                class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100">
+                @dblclick="openFolder(file)"                
+                class="bg-slate-400 border-b transition duration-300 ease-in-out hover:bg-slate-300 cursor-pointer"> 
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                         <span class="w-8 flex items-center justify-center mr-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -42,11 +43,16 @@
             </tr>
             </tbody>
         </table>
+        <div v-if="!files.data.length"
+             class="py-8 text-center text-sm text-gray-400"
+        >There is no data in this folder!
+        </div>
     </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { router } from '@inertiajs/vue3';
 
 
 //Imports
@@ -60,14 +66,22 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 //Props and Emit
 const {files} = defineProps({
-    files: Object
+    files: Object,
+    folder: Object
 })
 
 //Computed
 
 
 //Methods
-
+function openFolder(file){    
+    
+    if(!file.is_folder){
+        alert('not folder');
+        return;
+    }
+    router.visit(route('myFiles',{folder:file.path}));
+}
 
 //Hooks
 

@@ -2,7 +2,7 @@
     <div class="h-screen bg-gray-100 flex w-full gap-4">
         <Navigation />
 
-        <main class="flex flex-col flex-1 px-4 overflow-hidden bg-slate-400">
+        <main class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-300">
             <div class="flex items-center justify-between w-full">
                 <SearchForm />
                 <UserSettingsDropdown />
