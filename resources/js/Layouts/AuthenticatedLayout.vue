@@ -15,9 +15,35 @@
 </template>
 
 <script setup>
+
+//Imports
 import Navigation from '@/Components/app/Navigation.vue';
 import SearchForm from '@/Components/app/SearchForm.vue';
 import UserSettingsDropdown from '@/Components/app/UserSettingsDropdown.vue';
+import {emitter, FILE_UPLOAD_STARTED} from "@/event-bus.js";
+import {onMounted, ref} from "vue";
+
+//Uses
+
+
+//Refs
+
+
+//Props and Emit
+
+
+//Computed
+
+
+//Methods
+function uploadFiles(files){
+    console.log(files);
+}
+
+//Hooks
+onMounted(() => {
+    emitter.on(FILE_UPLOAD_STARTED, uploadFiles)
+})
+
+
 </script>
-
-
