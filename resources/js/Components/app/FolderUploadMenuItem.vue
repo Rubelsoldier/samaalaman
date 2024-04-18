@@ -10,7 +10,7 @@
 <script setup>
 // Imports
 import {MenuItem} from "@headlessui/vue";
-// import {emitter, FILE_UPLOAD_STARTED} from "@/event-bus.js";
+import {emitter, FILE_UPLOAD_STARTED} from "@/event-bus.js";
 
 // Uses
 
