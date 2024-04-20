@@ -1,6 +1,5 @@
 <template>
     <AuthenticatedLayout>
-        <!-- <pre>{{ ancestors }}</pre> -->
         <!-- breadcumbs | starts  -->
         <nav class="flex items-center justify-between p-1 mb-3">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -36,8 +35,8 @@
             </div>
         </nav>
         <!-- breadcumbs | ends  -->
-
-        <table class="min-w-full">
+        <div class="flex-1 overflow-auto" >
+            <table class="min-w-full">
             <thead class="bg-gray-100 border-b">
                 <tr>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
@@ -55,7 +54,7 @@
                 </tr>
             </thead>
             <tbody>
-            <tr v-for="file of files.data" :key="file.id"
+            <tr v-for="file of allFiles.data" :key="file.id"
                 @dblclick="openFolder(file)"                
                 class="bg-slate-400 border-b transition duration-300 ease-in-out hover:bg-slate-300 cursor-pointer"> 
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
@@ -73,10 +72,12 @@
                 </td>
             </tr>
             </tbody>
-        </table>
-        <div v-if="!files.data.length"
-             class="py-8 text-center text-sm text-gray-400"
-        >There is no data in this folder!
+            </table>
+            <div v-if="!allFiles.data.length"
+                class="py-8 text-center text-sm text-gray-400"
+            >There is no data in this folder!
+            </div>
+            <div ref="loadMoreIntersect"></div>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -86,21 +87,28 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { HomeIcon } from '@heroicons/vue/20/solid';
 import { router,Link } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
+import {computed, onMounted, onUpdated, ref} from "vue";
+import { httpGet } from '@/Helper/http-helper';
 
 //Imports
 
 
 //Uses
 
-
-//Refs
-
-
 //Props and Emit
-const {files} = defineProps({
+const props = defineProps({
     files: Object,
     folder: Object,
     ancestors: Object
+})
+
+
+//Refs
+const loadMoreIntersect = ref(null)
+
+const allFiles = ref({
+    data: props.files.data,
+    next: props.files.links.next
 })
 
 //Computed
@@ -116,7 +124,33 @@ function openFolder(file){
     router.visit(route('myFiles',{folder:file.path}));
 }
 
+function loadMore(){
+    if (allFiles.value.next === null) {
+        return
+    }
+
+    httpGet(allFiles.value.next)
+        .then(res => {
+            allFiles.value.data = [...allFiles.value.data, ...res.data]
+            allFiles.value.next = res.links.next
+        })
+}
 //Hooks
 
+onUpdated(() => {
+    allFiles.value = {
+        data: props.files.data,
+        next: props.files.links.next
+    }
+})
 
+onMounted(() => {
+    
+    const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && loadMore()), {
+        rootMargin: '-250px 0px 0px 0px'
+    })
+
+    observer.observe(loadMoreIntersect.value)
+
+})
 </script>
