@@ -9,6 +9,7 @@ use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Requests\DestroyFilesRequest;
 
 class FileController extends Controller
 {
@@ -113,6 +114,33 @@ class FileController extends Controller
                 $this->saveFile($file, $user, $parent);
             }
         }
+    }
+
+    public function destroy(DestroyFilesRequest $request) {
+        
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        if ($data['all']) {
+            $children = $parent->children;
+
+            foreach ($children as $child) {
+                $child->delete();
+                // $child->moveToTrash();
+            }
+        } else {
+            foreach ($data['ids'] ?? [] as $id) {
+                $file = File::find($id);
+                $file->delete();
+
+                // if ($file) {
+                //     $file->moveToTrash();
+                // }
+
+            }
+        }
+
+        return to_route('myFiles', ['folder' => $parent->path]);
     }
 
     private function getRoot()

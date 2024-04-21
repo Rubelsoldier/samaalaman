@@ -39,6 +39,9 @@
             <table class="min-w-full">
             <thead class="bg-gray-100 border-b">
                 <tr>
+                    <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left w-[30px] max-w-[30px] pr-0">
+                        <Checkbox @change="onSelectAllChange" v-model:checked="allSelected"/>
+                    </th>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                         Name
                     </th>
@@ -55,8 +58,15 @@
             </thead>
             <tbody>
             <tr v-for="file of allFiles.data" :key="file.id"
+                @click="$event => toggleFileSelect(file) "
                 @dblclick="openFolder(file)"                
-                class="bg-slate-400 border-b transition duration-300 ease-in-out hover:bg-slate-300 cursor-pointer"> 
+                class="border-b transition duration-300 ease-in-out hover:bg-slate-300 cursor-pointer"                
+                :class="(selected[file.id] || allSelected ) ? 'bg-slate-300' : 'bg-slate-200'">  
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-[30px] max-w-[30px] pr-0">
+                    <Checkbox @change="$event => onSelectCheckboxChange(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected"/>
+                </td>
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                     <FileIcon :file="file"/>
                     {{ file.name }}
@@ -89,9 +99,9 @@ import { router,Link } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet } from '@/Helper/http-helper';
+import Checkbox from '@/Components/Checkbox.vue';
 
 //Imports
-
 
 //Uses
 
@@ -104,6 +114,8 @@ const props = defineProps({
 
 
 //Refs
+const allSelected = ref(false);
+const selected = ref({});
 const loadMoreIntersect = ref(null)
 
 const allFiles = ref({
@@ -134,6 +146,33 @@ function loadMore(){
             allFiles.value.data = [...allFiles.value.data, ...res.data]
             allFiles.value.next = res.links.next
         })
+}
+
+function onSelectAllChange() {
+    allFiles.value.data.forEach(f => {
+        selected.value[f.id] = allSelected.value
+    })
+}
+
+function onSelectCheckboxChange(file){
+    // make checkAll false, if at least one checkbox is not selected
+    if( !selected.value[file.id] ){
+        allSelected.value = false;
+    } else{   // checking, all files in a folder. If any is not checked break this loop. Otherwise, make allselected true.
+        let checked = true;
+        for( let file of allFiles.value.data ){
+            if(!selected.value[file.id]){
+                checked = false;
+                break;
+            }
+        }
+        allSelected.value = checked;
+    }
+}
+
+function toggleFileSelect(file){
+    selected.value[file.id] = !selected.value[file.id]
+    onSelectCheckboxChange(file);
 }
 //Hooks
 
