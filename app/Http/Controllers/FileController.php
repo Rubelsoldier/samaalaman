@@ -131,8 +131,9 @@ class FileController extends Controller
         } else {
             foreach ($data['ids'] ?? [] as $id) {
                 $file = File::find($id);
-                $file->delete();
-
+                if($file){
+                    $file->delete();
+                }
                 // if ($file) {
                 //     $file->moveToTrash();
                 // }

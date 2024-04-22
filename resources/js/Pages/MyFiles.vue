@@ -31,7 +31,7 @@
                 </label> -->
                 <!-- <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" /> -->
                 <!-- <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/> -->
-                <!-- <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @delete="onDelete"/> -->
+                <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @delete="onDelete"/> 
             </div>
         </nav>
         <!-- breadcumbs | ends  -->
@@ -85,7 +85,7 @@
             </table>
             <div v-if="!allFiles.data.length"
                 class="py-8 text-center text-sm text-gray-400"
-            >There is no data in this folder!
+                >There is no data in this folder!
             </div>
             <div ref="loadMoreIntersect"></div>
         </div>
@@ -93,15 +93,16 @@
 </template>
 
 <script setup>
+//Imports
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { HomeIcon } from '@heroicons/vue/20/solid';
 import { router,Link } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
+import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
-
-//Imports
 
 //Uses
 
@@ -124,7 +125,7 @@ const allFiles = ref({
 })
 
 //Computed
-
+const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]))
 
 //Methods
 function openFolder(file){    
@@ -173,6 +174,11 @@ function onSelectCheckboxChange(file){
 function toggleFileSelect(file){
     selected.value[file.id] = !selected.value[file.id]
     onSelectCheckboxChange(file);
+}
+
+function onDelete() {
+    allSelected.value = false
+    selected.value = {}
 }
 //Hooks
 
