@@ -30,7 +30,7 @@
                     <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
                 </label> -->
                 <!-- <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" /> -->
-                <!-- <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/> -->
+                <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
                 <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @delete="onDelete"/> 
             </div>
         </nav>
@@ -103,6 +103,7 @@ import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
+import DownloadFilesButton from '@/Components/app/DownloadFilesButton.vue';
 
 //Uses
 
