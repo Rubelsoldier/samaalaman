@@ -49,6 +49,31 @@ class FileController extends Controller
         return Inertia::render('MyFiles', compact('files', 'folder', 'ancestors'));
     }
 
+    public function trash(Request $request)
+    {
+        // $search = $request->get('search');
+        $files = File::onlyTrashed()
+            ->where('created_by', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(10);
+            // ->orderBy('files.id', 'desc');
+
+        // if ($search) {
+        //     $query->where('name', 'like', "%$search%");
+        // }
+
+        // $files = $query->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        // if ($request->wantsJson()) {
+        //     return $files;
+        // }
+
+        return Inertia::render('Trash', compact('files'));
+    }
+
     public function createFolder( StoreFolderRequest $request ) {
 
         $data = $request->validated();
@@ -128,8 +153,7 @@ class FileController extends Controller
             $children = $parent->children;
 
             foreach ($children as $child) {
-                $child->delete();
-                // $child->moveToTrash();
+                $child->moveToTrash();
             }
         } else {
             foreach ($data['ids'] ?? [] as $id) {
@@ -137,10 +161,9 @@ class FileController extends Controller
                 if($file){
                     $file->delete();
                 }
-                // if ($file) {
-                //     $file->moveToTrash();
-                // }
-
+                if ($file) {
+                    $file->moveToTrash();
+                }
             }
         }
 

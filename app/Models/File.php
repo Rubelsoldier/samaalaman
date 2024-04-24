@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Kalnoy\Nestedset\NodeTrait;
 use App\Traits\HasCreatorAndUpdater;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,13 @@ class File extends Model
         );
     }    
         
+    public function moveToTrash()
+    {
+        $this->deleted_at = Carbon::now();
+
+        return $this->save();
+    }
+    
     protected static function boot()
     {
         parent::boot();
