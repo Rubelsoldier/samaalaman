@@ -25,6 +25,7 @@
     </div>
     <ErrorDialog />
     <FormProgress :form="fileUploadForm" />
+    <Notification />
 </template>
 
 <script setup>
@@ -38,7 +39,8 @@ import {emitter, FILE_UPLOAD_STARTED, showErrorDialog} from "@/event-bus.js";
 import { useForm,usePage } from '@inertiajs/vue3';
 import {onMounted, ref} from "vue";
 import ErrorDialog from "@/Components/ErrorDialog.vue";
-// import Notification from "@/Components/Notification.vue";
+import Notification from "@/Components/Notification.vue";
+import {showSuccessNotification} from "@/event-bus.js";
 
 //Uses
 const page = usePage();
@@ -84,9 +86,9 @@ function uploadFiles(files){
 
     fileUploadForm.post(route('file.store'), {
 
-        // onSuccess: () => {
-        //     showSuccessNotification(`${files.length} files have been uploaded`)
-        // },
+        onSuccess: () => {
+            showSuccessNotification(`${files.length} files have been uploaded`)
+        },
 
         onError: errors => {
             let message = '';
