@@ -2,8 +2,8 @@
     <AuthenticatedLayout>
         <nav class="flex items-center justify-end p-1 mb-3">
             <div>
-                <!-- <DeleteForeverButton :all-selected="allSelected" :selected-ids="selectedIds" @delete="resetForm" />
-                <RestoreFilesButton :all-selected="allSelected" :selected-ids="selectedIds" @restore="resetForm"/> -->
+                <!-- <DeleteForeverButton :all-selected="allSelected" :selected-ids="selectedIds" @delete="resetForm" /> -->
+                <RestoreFilesButton :all-selected="allSelected" :selected-ids="selectedIds" @restore="resetForm"/> 
             </div>
         </nav>
         <div class="flex-1 overflow-auto">
@@ -60,7 +60,7 @@ import {httpGet} from "@/Helper/http-helper.js";
 import Checkbox from "@/Components/Checkbox.vue";
 import DeleteFilesButton from "@/Components/app/DeleteFilesButton.vue";
 import DownloadFilesButton from "@/Components/app/DownloadFilesButton.vue";
-// import RestoreFilesButton from "@/Components/app/RestoreFilesButton.vue";
+import RestoreFilesButton from "@/Components/app/RestoreFilesButton.vue";
 // import DeleteForeverButton from "@/Components/app/DeleteForeverButton.vue";
 
 // Uses

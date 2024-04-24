@@ -11,6 +11,7 @@ use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreFileRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\TrashFilesRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
 
@@ -292,7 +293,26 @@ class FileController extends Controller
     //     }
 
     //     return [$url, $filename];
-    // }
+    // }    
+
+    public function restore(TrashFilesRequest $request)
+    {
+        $data = $request->validated();
+        if ($data['all']) {
+            $children = File::onlyTrashed()->get();
+            foreach ($children as $child) {
+                $child->restore();
+            }
+        } else {
+            $ids = $data['ids'] ?? [];
+            $children = File::onlyTrashed()->whereIn('id', $ids)->get();
+            foreach ($children as $child) {
+                $child->restore();
+            }
+        }
+
+        return to_route('trash');
+    }
 
     private function getRoot()
     {
