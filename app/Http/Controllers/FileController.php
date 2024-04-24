@@ -68,9 +68,9 @@ class FileController extends Controller
 
         $files = FileResource::collection($files);
 
-        // if ($request->wantsJson()) {
-        //     return $files;
-        // }
+        if ($request->wantsJson()) {
+            return $files;
+        }
 
         return Inertia::render('Trash', compact('files'));
     }
@@ -159,9 +159,6 @@ class FileController extends Controller
         } else {
             foreach ($data['ids'] ?? [] as $id) {
                 $file = File::find($id);
-                if($file){
-                    $file->delete();
-                }
                 if ($file) {
                     $file->moveToTrash();
                 }
@@ -308,6 +305,25 @@ class FileController extends Controller
             $children = File::onlyTrashed()->whereIn('id', $ids)->get();
             foreach ($children as $child) {
                 $child->restore();
+            }
+        }
+
+        return to_route('trash');
+    }
+
+    public function deleteForever(TrashFilesRequest $request)
+    {
+        $data = $request->validated();
+        if ($data['all']) {
+            $children = File::onlyTrashed()->get();
+            foreach ($children as $child) {
+                $child->deleteForever();
+            }
+        } else {
+            $ids = $data['ids'] ?? [];
+            $children = File::onlyTrashed()->whereIn('id', $ids)->get();
+            foreach ($children as $child) {
+                $child->deleteForever();
             }
         }
 
