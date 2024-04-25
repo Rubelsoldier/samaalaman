@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Kalnoy\Nestedset\NodeTrait;
 use App\Traits\HasCreatorAndUpdater;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,6 +26,12 @@ class File extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(File::class, 'parent_id');
+    }
+
+    public function starred()
+    {
+        return $this->hasOne(StarredFile::class, 'file_id', 'id')
+            ->where('user_id', Auth::id());
     }
     
     public function isOwnedBy($userId): bool

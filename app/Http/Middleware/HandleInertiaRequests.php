@@ -2,8 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Tighten\Ziggy\Ziggy;
+use Illuminate\Http\Request;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,11 +30,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
+        return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
             ],
-        ];
+            'csrf_token' => csrf_token(),
+            'ziggy' => function () use ($request) {
+                return array_merge((new Ziggy)->toArray(), [
+                    'location' => $request->url(),
+                ]);
+            },
+        ]);
     }
 }

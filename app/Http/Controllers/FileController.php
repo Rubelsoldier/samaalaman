@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use ZipArchive;
 use App\Models\File;
 use Inertia\Inertia;
+use App\Models\StarredFile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreFileRequest;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\TrashFilesRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Requests\AddToFavouritesRequest;
 
 class FileController extends Controller
 {
@@ -31,10 +34,12 @@ class FileController extends Controller
         }
 
         $files = File::query()
+            ->with('starred')
             ->where('parent_id',$folder->id)
             ->where('created_by',Auth::id())
             ->orderBy('is_folder','desc')
             ->orderBy('created_at','desc')
+            ->orderBy('id','desc')
             ->paginate(5);
 
         $files = FileResource::collection($files);
@@ -328,6 +333,33 @@ class FileController extends Controller
         }
 
         return to_route('trash');
+    }
+
+    public function addToFavourites(AddToFavouritesRequest $request)
+    {
+        $data = $request->validated();
+
+        $id = $data['id'];
+        $file = File::find($id);
+        $user_id = Auth::id();
+
+        $starredFile = StarredFile::query()
+            ->where('file_id', $file->id)
+            ->where('user_id', $user_id)
+            ->first();
+
+        if ($starredFile) {
+            $starredFile->delete();
+        } else {
+            StarredFile::create([
+                'file_id' => $file->id,
+                'user_id' => $user_id,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+        }
+
+        return redirect()->back();
     }
 
     private function getRoot()
