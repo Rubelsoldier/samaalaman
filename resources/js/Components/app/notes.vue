@@ -7,3 +7,5 @@ I want to upload files, where another file is already exist, but now, it doesn't
 ======= To Do ======
 1. Selecting multiple files pressing shift .
 Keeping code to delete files from public folder after a certain time as, they are files for downloading. No need them later
+
+2. favourites er jono alada page khola like trash page.

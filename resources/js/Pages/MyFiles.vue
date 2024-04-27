@@ -123,6 +123,7 @@ import DownloadFilesButton from '@/Components/app/DownloadFilesButton.vue';
 
 //Uses
 const page = usePage();
+let params = null;
 
 //Props and Emit
 const props = defineProps({
@@ -136,6 +137,7 @@ const props = defineProps({
 const allSelected = ref(false);
 const selected = ref({});
 const loadMoreIntersect = ref(null)
+const onlyFavourites = ref(false);
 
 const allFiles = ref({
     data: props.files.data,
@@ -232,6 +234,9 @@ onUpdated(() => {
 })
 
 onMounted(() => {
+    params = new URLSearchParams(window.location.search)
+    console.log(params.get('favourites'));
+    onlyFavourites.value = params.get('favourites') === '1'
     
     const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && loadMore()), {
         rootMargin: '-250px 0px 0px 0px'
