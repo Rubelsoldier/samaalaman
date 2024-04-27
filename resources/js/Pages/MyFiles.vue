@@ -29,7 +29,7 @@
                     Only Favourites
                     <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
                 </label>
-                <!-- <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" /> -->
+                <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" />
                 <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
                 <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @delete="onDelete"/> 
             </div>
@@ -43,7 +43,7 @@
                         <Checkbox @change="onSelectAllChange" v-model:checked="allSelected"/>
                     </th>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                        Name
+                        Name 
                     </th>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                         Owner
@@ -85,7 +85,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                     <FileIcon :file="file"/>
-                    {{ file.name }}
+                    {{ file.name + file.id}}
                 </td>
                 <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                     {{ file.owner }}
@@ -116,6 +116,7 @@ import { HomeIcon } from '@heroicons/vue/20/solid';
 import { router,Link, usePage } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
 import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
+import ShareFilesButton from '@/Components/app/ShareFilesButton.vue'
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';

@@ -4,15 +4,21 @@ namespace App\Http\Controllers;
 
 use ZipArchive;
 use App\Models\File;
+use App\Models\User;
 use Inertia\Inertia;
+use App\Models\FileShare;
 use App\Models\StarredFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use App\Mail\ShareFilesMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreFileRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\ShareFilesRequest;
 use App\Http\Requests\TrashFilesRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
@@ -140,6 +146,11 @@ class FileController extends Controller
         $parent->appendNode($model);
 
         // UploadFileToCloudJob::dispatch($model);
+    }
+
+    private function getRoot()
+    {
+        return File::query()->whereIsRoot()->where('created_by', Auth::id())->firstOrFail();
     }
 
     public function saveFileTree($fileTree, $parent, $user)
@@ -370,8 +381,58 @@ class FileController extends Controller
         return redirect()->back();
     }
 
-    private function getRoot()
-    {
-        return File::query()->whereIsRoot()->where('created_by', Auth::id())->firstOrFail();
+    public function share(ShareFilesRequest $request) {
+        
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        $all = $data['all'] ?? false;
+        $email = $data['email'] ?? false;
+        $ids = $data['ids'] ?? [];
+
+        if (!$all && empty($ids)) {
+            return [
+                'message' => 'Please select files to share'
+            ];
+        }        
+        
+        $user = User::query()->where('email', $email)->first();
+
+        if (!$user) {
+            return redirect()->back();
+        }
+        
+        if ($all) {
+            $files = $parent->children;
+        } else {
+            $files = File::find($ids);
+        }
+
+        $data = [];
+        $ids = Arr::pluck($files, 'id');
+        $existingFileIds = FileShare::query()
+            ->whereIn('file_id', $ids)
+            ->where('user_id', $user->id)
+            ->get()
+            ->keyBy('file_id');
+
+        foreach ($files as $file) {
+            if ($existingFileIds->has($file->id)) {
+                continue;
+            }
+            $data[] = [
+                'file_id' => $file->id,
+                'user_id' => $user->id,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        FileShare::insert($data);
+
+        Mail::to($user)->send(new ShareFilesMail($user, Auth::user(), $files));
+
+        return redirect()->back();
+
     }
 }

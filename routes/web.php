@@ -28,6 +28,8 @@ Route::controller(\App\Http\Controllers\FileController::class)
         Route::delete('/file/delete-forever', 'deleteForever')->name('file.deleteForever');
         Route::post('/file/add-to-favourites', 'addToFavourites')->name('file.addToFavourites');
         Route::get('/file/download', 'download')->name('file.download');
+        Route::post('/file/share', 'share')->name('file.share');
+
 
     });
 
