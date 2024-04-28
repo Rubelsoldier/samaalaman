@@ -27,8 +27,12 @@ Route::controller(\App\Http\Controllers\FileController::class)
         Route::post('/file/restore', 'restore')->name('file.restore');
         Route::delete('/file/delete-forever', 'deleteForever')->name('file.deleteForever');
         Route::post('/file/add-to-favourites', 'addToFavourites')->name('file.addToFavourites');
+        Route::get('/shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');
+        Route::get('/shared-by-me', 'sharedByMe')->name('file.sharedByMe');
+        Route::post('/file/share', 'share')->name('file.share');        
         Route::get('/file/download', 'download')->name('file.download');
-        Route::post('/file/share', 'share')->name('file.share');
+        Route::get('/file/download-shared-with-me', 'downloadSharedWithMe')->name('file.downloadSharedWithMe');
+        Route::get('/file/download-shared-by-me', 'downloadSharedByMe')->name('file.downloadSharedByMe');
 
 
     });
