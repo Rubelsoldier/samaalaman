@@ -8,7 +8,6 @@
                    placeholder="Search for files and folders"
         />
     </div>
-    <pre>{{ search }}</pre>
 </template>
 
 <script setup>

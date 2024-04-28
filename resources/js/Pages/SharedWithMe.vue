@@ -88,8 +88,6 @@ const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[
 
 // Methods
 function loadMore() {
-    console.log("load more");
-    console.log(allFiles.value.next);
 
     if (allFiles.value.next === null) {
         return
