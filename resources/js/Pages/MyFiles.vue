@@ -36,14 +36,18 @@
         </nav>
         <!-- breadcumbs | ends  -->
         <div class="flex-1 overflow-auto" >
-            <table class="min-w-full">
-            <thead class="bg-gray-100 border-b">
+            <table class="min-w-full bg-slate-200">
+            <thead class="bg-gray-100 border-b bg-slate-200">
                 <tr>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left w-[30px] max-w-[30px] pr-0">
                         <Checkbox @change="onSelectAllChange" v-model:checked="allSelected"/>
                     </th>
+                    <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left"></th>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                         Name 
+                    </th>
+                    <th v-if="search" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                        Path 
                     </th>
                     <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                         Owner
@@ -85,7 +89,10 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                     <FileIcon :file="file"/>
-                    {{ file.name + file.id}}
+                    {{ file.name }}
+                </td>
+                <td v-if="search" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {{ file.path }}
                 </td>
                 <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                     {{ file.owner }}
@@ -121,6 +128,8 @@ import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
 import DownloadFilesButton from '@/Components/app/DownloadFilesButton.vue';
+import {emitter, ON_SEARCH, showSuccessNotification} from "@/event-bus.js";
+
 
 //Uses
 const page = usePage();
@@ -135,6 +144,7 @@ const props = defineProps({
 
 
 //Refs
+let search = ref('');
 const allSelected = ref(false);
 const selected = ref({});
 const loadMoreIntersect = ref(null)
@@ -236,9 +246,13 @@ onUpdated(() => {
 
 onMounted(() => {
     params = new URLSearchParams(window.location.search)
-    console.log(params.get('favourites'));
     onlyFavourites.value = params.get('favourites') === '1'
-    
+
+    search.value = params.get('search');
+    emitter.on(ON_SEARCH, (value) => {
+        search.value = value
+    })
+
     const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && loadMore()), {
         rootMargin: '-250px 0px 0px 0px'
     })
