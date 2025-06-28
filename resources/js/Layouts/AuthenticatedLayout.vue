@@ -6,7 +6,7 @@
             @drop.prevent="handleDrop"
             @dragover.prevent="onDragOver"
             @dragleave.prevent="onDragLeave"
-            class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-300"
+            class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-100"
             :class="dragOver ? 'dropzone' : ''">
             
             <template v-if="dragOver" class="text-gray-500 text-center py-8 text-sm">

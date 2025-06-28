@@ -22,7 +22,7 @@
                         <a        
                             href="#"                    
                             @click.prevent="showCreateFolderModal"
-                            class="text-gray-700 block px-4 py-2 text-sm">
+                            class="text-gray-700 block px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 focus:bg-gray-100">
                             New Folder
                         </a>
                     </MenuItem>

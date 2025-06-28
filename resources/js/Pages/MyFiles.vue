@@ -5,7 +5,7 @@
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li v-for="ans of ancestors.data" :key="ans.id" class="inline-flex items-center">
                     <Link v-if="!ans.parent_id" :href="route('myFiles')"
-                          class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                          class="inline-flex gap-1 items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
                         <HomeIcon class="w-4 h-4"/>
                         My Files
                     </Link>

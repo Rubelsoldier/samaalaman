@@ -1,4 +1,5 @@
 ===== Issues =====
+- permanant deletion from trash didn't work
 
 Download didn't work as like the tut. I replaced str::random() in createzip fun by $filename. Otherwise, it wasn't downloading the zip file as parent name. After replacing , its now working fine.
 

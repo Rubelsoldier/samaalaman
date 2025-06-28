@@ -1,7 +1,7 @@
 <template>
     <div class="w-[600px] h-[80px] flex items-center">
         <TextInput type="text"
-                   class="block w-full mr-2 bg-slate-300 border-slate-200"    
+                   class="block w-full mr-2 bg-gray-200 border-slate-200"    
                    v-model="search"               
                    autocomplete   
                    @keyup.enter.prevent="onSearch"         
