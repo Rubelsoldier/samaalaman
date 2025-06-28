@@ -1,3 +1,3 @@
 <template>    
-    <img src="images/samalaman.png" alt="">
+    <img src="images/samalaman.png" alt="samalaman">
 </template>

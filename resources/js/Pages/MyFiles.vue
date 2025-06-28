@@ -61,14 +61,14 @@
                 </tr>
             </thead>
             <tbody>
-            <tr v-for="file of allFiles.data" :key="file.id"
-                @click="$event => toggleFileSelect(file) "
+            <tr v-for="(file, idx) in allFiles.data" :key="file.id"
+                @click="event => toggleFileSelect(file, idx, event)"
                 @dblclick="openFolder(file)"                
                 class="border-b transition duration-300 ease-in-out hover:bg-slate-300 cursor-pointer"                
                 :class="(selected[file.id] || allSelected ) ? 'bg-slate-300' : 'bg-slate-200'">  
 
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-[30px] max-w-[30px] pr-0">
-                    <Checkbox @change="$event => onSelectCheckboxChange(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected"/>
+                    <Checkbox @click.stop="$event => onSelectCheckboxChange(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected"/>
                 </td>
                 <td class="px-6 py-4 max-w-[40px] text-sm font-medium text-gray-900 text-yellow-500">
                     <div @click.stop.prevent="addRemoveFavourite(file)">
@@ -145,10 +145,10 @@ const props = defineProps({
 
 //Refs
 let search = ref('');
-const allSelected = ref(false);
 const selected = ref({});
 const loadMoreIntersect = ref(null)
 const onlyFavourites = ref(false);
+const lastSelectedFileIndex = ref(null);
 
 const allFiles = ref({
     data: props.files.data,
@@ -157,6 +157,22 @@ const allFiles = ref({
 
 //Computed
 const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]))
+
+const allSelected = computed({
+  get() {
+    if (allFiles.value.data.length === 0) {
+      return false;
+    }
+    const allFileIds = allFiles.value.data.map(f => f.id);
+    const selectedCount = allFileIds.filter(id => selected.value[id]).length;
+    return selectedCount === allFiles.value.data.length;
+  },
+  set(value) {
+    allFiles.value.data.forEach(file => {
+      selected.value[file.id] = value;
+    });
+  }
+});
 
 //Methods
 function openFolder(file){    
@@ -202,9 +218,19 @@ function onSelectCheckboxChange(file){
     }
 }
 
-function toggleFileSelect(file){
-    selected.value[file.id] = !selected.value[file.id]
-    onSelectCheckboxChange(file);
+function toggleFileSelect(file, index, event) {
+    if (event.shiftKey && lastSelectedFileIndex.value !== null) {
+        const start = Math.min(lastSelectedFileIndex.value, index);
+        const end = Math.max(lastSelectedFileIndex.value, index);
+
+        for (let i = start; i <= end; i++) {
+            const fileToSelect = allFiles.value.data[i];
+            selected.value[fileToSelect.id] = true;
+        }
+    } else {
+        selected.value[file.id] = !selected.value[file.id];
+        lastSelectedFileIndex.value = index;
+    }
 }
 
 function onDelete() {
