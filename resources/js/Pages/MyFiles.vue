@@ -25,8 +25,9 @@
             </ol>
 
             <div class="flex">
+                <MoveFiles :all-selected="allSelected" :selected-ids="selectedIds" :ancestors="ancestors" />
                 <label class="flex items-center mr-3">
-                    Only Favourites
+                    Favourites
                     <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
                 </label>
                 <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" />
@@ -124,6 +125,7 @@ import { router,Link, usePage } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
 import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import ShareFilesButton from '@/Components/app/ShareFilesButton.vue'
+import MoveFiles from '@/Components/app/MoveFiles.vue';
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';

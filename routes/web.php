@@ -37,6 +37,11 @@ Route::controller(\App\Http\Controllers\FileController::class)
 
     });
 
+Route::controller(\App\Http\Controllers\FolderController::class)
+    ->middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/folders/{folder}/subfolders', 'getSubFolders')->name('folders.subfolders');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
