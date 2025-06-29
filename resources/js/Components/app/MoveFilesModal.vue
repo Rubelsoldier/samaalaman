@@ -58,7 +58,7 @@
                 <SecondaryButton @click="closeModal">Cancel</SecondaryButton>
                 <PrimaryButton class="ml-3"
                                :class="{ 'opacity-25': form.processing }"
-                               @click="share" :disable="form.processing">
+                               @click="moveFiles" :disable="form.processing">
                     Submit
                 </PrimaryButton>
             </div>
@@ -84,7 +84,8 @@ const form = useForm({
     email: null,
     all: false,
     ids:[],
-    parent_id: null
+    parent_id: null,
+    parent_rgt: null  // Add this new field
 })
 const page = usePage();
 
@@ -92,9 +93,17 @@ const page = usePage();
 const props = defineProps({
     modelValue: Boolean,
     allSelected: Boolean,
-    selectedIds: Array,
+    selectedId: {
+        type: [Number, String],
+        required: true,
+        default: null
+    },
     ancestors: {
         type: Object,
+        required: true
+    },
+    width: {
+        type: Number,
         required: true
     }
 })
@@ -104,7 +113,8 @@ const currentFolderId = ref(null);
 const subFolders = ref([]);
 const navigationStack = ref(props.ancestors.data.map(ancestor => ({
     ...ancestor,
-    has_children: true // We assume root and current path folders have children since we're seeing them
+    has_children: true,
+    _rgt: ancestor._rgt // Make sure _rgt is included from ancestors
 })));
 const initialAncestors = ref(null);
 
@@ -124,26 +134,33 @@ function onShow() {
     })
 }
 
-function share() {
-    form.parent_id = page.props.folder.id
-    console.log(props.selectedIds, props.allSelected);
+function moveFiles() {
+    const targetFolder = navigationStack.value[navigationStack.value.length - 1];
+    form.parent_id = targetFolder.id;
+    form.parent_rgt = targetFolder._rgt;
+    
     if (props.allSelected) {
         form.all = true;
         form.ids = [];
-    }  else {
-        form.ids = props.selectedIds
+    } else {
+        form.ids = props.selectedIds;
     }
-    const email = form.email
-    form.post(route('file.share'), {
+
+    form.post(route('files.move'), {
         preserveScroll: true,
         onSuccess: () => {
-            closeModal()
+            closeModal();
             form.reset();
-            // Show success notification
-            showSuccessNotification(`Selected files will be shared to "${email}" if the emails exists in the system`)
+            showSuccessNotification('Files moved successfully');
         },
-        onError: () => emailInput.value.focus()
-    })
+        onError: (errors) => {
+            if (errors.message) {
+                showSuccessNotification(errors.message, 'error');
+            } else {
+                showSuccessNotification('Error moving files', 'error');
+            }
+        }
+    });
 }
 
 function closeModal() {
@@ -168,7 +185,8 @@ async function selectFolder(folder) {
             name: folder.name,
             path: folder.path,
             has_children: response.data.length > 0,
-            parent_id: navigationStack.value[navigationStack.value.length - 2]?.id // Get parent's ID
+            parent_id: navigationStack.value[navigationStack.value.length - 2]?.id,
+            _rgt: folder._rgt // Make sure to include _rgt
         };
 
         // Get current folder's parent index in navigation
@@ -270,4 +288,3 @@ onMounted(() => {
     position: relative;
 }
 </style>
-

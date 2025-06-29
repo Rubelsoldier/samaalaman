@@ -33,7 +33,7 @@ Route::controller(\App\Http\Controllers\FileController::class)
         Route::get('/file/download', 'download')->name('file.download');
         Route::get('/file/download-shared-with-me', 'downloadSharedWithMe')->name('file.downloadSharedWithMe');
         Route::get('/file/download-shared-by-me', 'downloadSharedByMe')->name('file.downloadSharedByMe');
-
+        Route::post('/files/move', 'move')->name('files.move');
 
     });
 

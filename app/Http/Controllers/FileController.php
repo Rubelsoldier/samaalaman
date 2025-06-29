@@ -23,6 +23,7 @@ use App\Http\Requests\TrashFilesRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\AddToFavouritesRequest;
+use Illuminate\Support\Facades\DB;
 
 class FileController extends Controller
 {
@@ -575,6 +576,11 @@ class FileController extends Controller
         }
 
         return [$url, $filename];
+    }
+
+    public function move(Request $request)
+    {
+        dd('meau');
     }
 
 }

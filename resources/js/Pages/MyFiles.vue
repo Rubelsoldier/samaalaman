@@ -25,7 +25,12 @@
             </ol>
 
             <div class="flex">
-                <MoveFiles :all-selected="allSelected" :selected-ids="selectedIds" :ancestors="ancestors" />
+                <MoveFiles
+                 :all-selected="allSelected" 
+                 :selected-ids="selectedIds" 
+                 :ancestors="ancestors" 
+                 :selected-file="selectedFile"
+                />
                 <label class="flex items-center mr-3">
                     Favourites
                     <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
@@ -158,6 +163,11 @@ const allFiles = ref({
 })
 
 //Computed
+const selectedFile = computed(() => {
+    const found = allFiles.value.data.find(file => selected.value[file.id] || allSelected.value);
+    return found || null;
+})
+
 const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]))
 
 const allSelected = computed({

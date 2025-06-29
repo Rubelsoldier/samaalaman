@@ -19,6 +19,8 @@ class FileResource extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             "path" => $this->path,
+            '_lft' => $this->whenNotNull($this->_lft),
+            '_rgt' => $this->whenNotNull($this->_rgt),
             "parent_id" => $this->parent_id,
             "is_folder" => $this->is_folder,
             "mime" => $this->mime,
@@ -29,7 +31,7 @@ class FileResource extends JsonResource
             "updated_at" => $this->updated_at->diffForHumans(),
             "created_by" => $this->created_by,
             "updated_by" => $this->updated_by,
-            "deleted_at" => $this->deleted_at,  
+            "deleted_at" => $this->deleted_at  
         ];
     }
 }
