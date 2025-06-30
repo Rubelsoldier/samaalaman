@@ -10,3 +10,6 @@ I want to upload files, where another file is already exist, but now, it doesn't
 Keeping code to delete files from public folder after a certain time as, they are files for downloading. No need them later
 
 2. favourites er jono alada page khola like trash page.
+
+3. NOTIFICATION  cancel x button 
+
