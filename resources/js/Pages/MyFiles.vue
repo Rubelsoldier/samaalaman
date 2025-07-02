@@ -1,6 +1,7 @@
 <template>
     <AuthenticatedLayout>
         <!-- breadcumbs | starts  -->
+        <span class="text-xs text-red-100">( Not optimized for mobile view )</span>
         <nav class="flex items-center justify-between p-1 mb-3">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li v-for="ans of ancestors.data" :key="ans.id" class="inline-flex items-center">
@@ -25,8 +26,14 @@
             </ol>
 
             <div class="flex">
+                <MoveFiles
+                 :all-selected="allSelected" 
+                 :selected-ids="selectedIds" 
+                 :ancestors="ancestors" 
+                 :selected-file="selectedFile"
+                />
                 <label class="flex items-center mr-3">
-                    Only Favourites
+                    Favourites
                     <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
                 </label>
                 <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" />
@@ -124,6 +131,7 @@ import { router,Link, usePage } from '@inertiajs/vue3';
 import FileIcon from '@/Components/app/FileIcon.vue'
 import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import ShareFilesButton from '@/Components/app/ShareFilesButton.vue'
+import MoveFiles from '@/Components/app/MoveFiles.vue';
 import {computed, onMounted, onUpdated, ref} from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
@@ -156,6 +164,11 @@ const allFiles = ref({
 })
 
 //Computed
+const selectedFile = computed(() => {
+    const found = allFiles.value.data.find(file => selected.value[file.id] || allSelected.value);
+    return found || null;
+})
+
 const selectedIds = computed(() => Object.entries(selected.value).filter(a => a[1]).map(a => a[0]))
 
 const allSelected = computed({

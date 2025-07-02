@@ -23,6 +23,7 @@ use App\Http\Requests\TrashFilesRequest;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\AddToFavouritesRequest;
+use Illuminate\Support\Facades\DB;
 
 class FileController extends Controller
 {
@@ -69,11 +70,20 @@ class FileController extends Controller
         if ($request->wantsJson()) {
             return $files;
         }
-
-        $ancestors = FileResource::collection([...$folder->ancestors, $folder]);
-
+        
+        // Get ancestors by following parent_id chain
+        $ancestors = collect();
+        $current = $folder;
+        while ($current) {
+            if ($current->is_folder) {
+                $ancestors->prepend($current);
+            }
+            $current = $current->parent;
+        }
+        
+        $ancestors = FileResource::collection($ancestors);
         $folder = new FileResource($folder);
-
+        
         return Inertia::render('MyFiles', compact('files', 'folder', 'ancestors'));
     }
 
@@ -85,7 +95,7 @@ class FileController extends Controller
             ->where('created_by', Auth::id())
             ->orderBy('is_folder', 'desc')
             ->orderBy('deleted_at', 'desc')
-            ->orderBy('files.id', 'desc') ;                       
+            ->orderBy('files.id', 'desc')    ;                   
 
         if ($search) {
             $query->where('name', 'like', "%$search%");
@@ -538,7 +548,6 @@ class FileController extends Controller
             'filename' => $filename
         ];
     }
-
     private function getDownloadUrl(array $ids, $zipName)
     {
         if (count($ids) === 1) {
@@ -575,6 +584,74 @@ class FileController extends Controller
         }
 
         return [$url, $filename];
+    }
+
+    public function move(Request $request) {
+        try {
+            $data = $request->validate([
+                'parent_id' => 'required|exists:files,id',
+                'parent_rgt' => 'required|integer',
+                'width' => 'required|integer',
+                'selectedFile_lft' => 'required|integer',
+                'selectedFile_rgt' => 'required|integer'
+            ]);
+
+            DB::beginTransaction();
+
+            // Get the moving node's ID
+            $movingNode = DB::table('files')
+                ->where('_lft', $data['selectedFile_lft'])
+                ->first();
+
+            // 1. Mark nodes that are being moved
+            DB::statement("UPDATE files 
+                        SET _lft = -_lft, 
+                            _rgt = -_rgt 
+                        WHERE _lft >= ? AND _lft <= ?", 
+                        [$data['selectedFile_lft'], $data['selectedFile_rgt']]);
+
+            // 2. Close gaps
+            $width = $data['selectedFile_rgt'] - $data['selectedFile_lft'] + 1;
+            DB::statement("UPDATE files 
+                        SET _lft = _lft - ? 
+                        WHERE _lft > ?", 
+                        [$width, $data['selectedFile_rgt']]);
+            
+            DB::statement("UPDATE files 
+                        SET _rgt = _rgt - ? 
+                        WHERE _rgt > ?", 
+                        [$width, $data['selectedFile_rgt']]);
+
+            // 3. Make space for the nodes
+            DB::statement("UPDATE files 
+                        SET _lft = _lft + ? 
+                        WHERE _lft > ?", 
+                        [$width, $data['parent_rgt'] - 1]);
+            
+            DB::statement("UPDATE files 
+                        SET _rgt = _rgt + ? 
+                        WHERE _rgt > ?", 
+                        [$width, $data['parent_rgt'] - 1]);
+
+            // 4. Move the nodes to their new position, only update parent_id for the moving node
+            $offset = $data['parent_rgt'] - $data['selectedFile_lft'];
+            DB::statement("UPDATE files 
+                        SET _lft = -_lft + ?,
+                            _rgt = -_rgt + ?,
+                            parent_id = CASE 
+                                WHEN id = ? THEN ?
+                                ELSE parent_id 
+                            END
+                        WHERE _lft < 0", 
+                        [$offset, $offset, $movingNode->id, $data['parent_id']]);
+
+            DB::commit();
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
 }

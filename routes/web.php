@@ -33,10 +33,15 @@ Route::controller(\App\Http\Controllers\FileController::class)
         Route::get('/file/download', 'download')->name('file.download');
         Route::get('/file/download-shared-with-me', 'downloadSharedWithMe')->name('file.downloadSharedWithMe');
         Route::get('/file/download-shared-by-me', 'downloadSharedByMe')->name('file.downloadSharedByMe');
-
+        Route::post('/files/move', 'move')->name('files.move');
 
     });
 
+Route::controller(\App\Http\Controllers\FolderController::class)
+    ->middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/folders/{folder}/subfolders', 'getSubFolders')->name('folders.subfolders');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
