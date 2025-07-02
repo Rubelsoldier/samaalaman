@@ -598,6 +598,11 @@ class FileController extends Controller
 
             DB::beginTransaction();
 
+            // Get the moving node's ID
+            $movingNode = DB::table('files')
+                ->where('_lft', $data['selectedFile_lft'])
+                ->first();
+
             // 1. Mark nodes that are being moved
             DB::statement("UPDATE files 
                         SET _lft = -_lft, 
@@ -628,14 +633,17 @@ class FileController extends Controller
                         WHERE _rgt > ?", 
                         [$width, $data['parent_rgt'] - 1]);
 
-            // 4. Move the nodes to their new position
+            // 4. Move the nodes to their new position, only update parent_id for the moving node
             $offset = $data['parent_rgt'] - $data['selectedFile_lft'];
             DB::statement("UPDATE files 
                         SET _lft = -_lft + ?,
                             _rgt = -_rgt + ?,
-                            parent_id = ?
+                            parent_id = CASE 
+                                WHEN id = ? THEN ?
+                                ELSE parent_id 
+                            END
                         WHERE _lft < 0", 
-                        [$offset, $offset, $data['parent_id']]);
+                        [$offset, $offset, $movingNode->id, $data['parent_id']]);
 
             DB::commit();
             return redirect()->back();
@@ -647,4 +655,3 @@ class FileController extends Controller
     }
 
 }
-        

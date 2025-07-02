@@ -2,8 +2,8 @@
     <modal :show="props.modelValue" @show="onShow" max-width="sm">
         <div class="p-6">
             <h2 class="text-lg font-medium text-gray-900">
-                Move Files
-                <!-- <pre>{{ navigationStack }}</pre> -->
+                Move Files 
+                <span class="text-xs text-red-100">( single File || Folder )</span>
             </h2>
             <!-- breadcrumbs -->
             <ol class="inline-flex items-center space-x-1 md:space-x-3 mb-4">
@@ -206,7 +206,7 @@ async function selectFolder(folder) {
     
     try {
         const response = await axios.get(route('folders.subfolders', { folder: folder.id }));
-        alert(JSON.stringify(response.data)); // Remove or comment out for production
+        // alert(JSON.stringify(response.data)); // Remove or comment out for production
         // Use the folder.path to reconstruct the breadcrumb if available
         let breadcrumb = [];
         const root = initialAncestors.value ? initialAncestors.value[0] : props.ancestors.data[0];
