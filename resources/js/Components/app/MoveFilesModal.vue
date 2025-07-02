@@ -32,12 +32,12 @@
                             {{ ans.name }}
                         </a>
                         <button v-if="ans.has_children" @click.stop="loadSubFolders(ans)" class="focus:outline-none ml-1">
-                            <!-- <svg aria-hidden="true" class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
+                            <svg aria-hidden="true" class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                       d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                       clip-rule="evenodd"></path>
-                            </svg> -->
+                            </svg>
                         </button>
                     </div>
                 </li>
@@ -203,17 +203,21 @@ function closeModal() {
 }
 
 async function selectFolder(folder) {    
+    
     try {
         const response = await axios.get(route('folders.subfolders', { folder: folder.id }));
-        
+        alert(JSON.stringify(response.data)); // Remove or comment out for production
         // Use the folder.path to reconstruct the breadcrumb if available
         let breadcrumb = [];
         const root = initialAncestors.value ? initialAncestors.value[0] : props.ancestors.data[0];
 
+        // Determine if this folder has subfolders
+        const hasSubfolders = Array.isArray(response.data) && response.data.length > 0;
+
         if (folder.id === root.id) {
             breadcrumb = [{
                 ...root,
-                has_children: true
+                has_children: hasSubfolders
             }];
         } else if (folder.path) {
             // Split the path and walk from root to the selected folder
@@ -240,7 +244,7 @@ async function selectFolder(folder) {
                         id: folder.id,
                         name: folder.name,
                         path: folder.path,
-                        has_children: response.data.length > 0,
+                        has_children: hasSubfolders,
                         parent_id: folder.parent_id,
                         _rgt: folder._rgt
                     };
@@ -248,7 +252,7 @@ async function selectFolder(folder) {
                 if (match) {
                     currentStack.push({
                         ...match,
-                        has_children: true
+                        has_children: i === pathParts.length - 1 ? hasSubfolders : true
                     });
                 }
             }
@@ -263,7 +267,7 @@ async function selectFolder(folder) {
                 id: folder.id,
                 name: folder.name,
                 path: folder.path,
-                has_children: response.data.length > 0,
+                has_children: hasSubfolders,
                 parent_id: folder.parent_id,
                 _rgt: folder._rgt
             };
@@ -313,10 +317,10 @@ async function selectFolder(folder) {
         subFolders.value = [];
         currentFolderId.value = null;
 
-        if (response.data.length > 0) {
+        if (hasSubfolders) {
             subFolders.value = response.data.map(f => ({
                 ...f,
-                has_children: f.has_children
+                has_children: Array.isArray(f.subfolders) ? f.subfolders.length > 0 : !!f.has_children
             }));
         }
 
@@ -339,10 +343,11 @@ async function navigateToFolder(index) {
 
         // Load subfolders of selected folder
         const response = await axios.get(route('folders.subfolders', { folder: folder.id }));
-        if (response.data.length > 0) {
+        const hasSubfolders = Array.isArray(response.data) && response.data.length > 0;
+        if (hasSubfolders) {
             subFolders.value = response.data.map(f => ({
                 ...f,
-                has_children: f.has_children
+                has_children: Array.isArray(f.subfolders) ? f.subfolders.length > 0 : !!f.has_children
             }));
         }
         
@@ -363,11 +368,11 @@ async function loadSubFolders(folder) {
         }
 
         const response = await axios.get(route('folders.subfolders', { folder: folder.id }));
-        
-        if (response.data.length > 0) {
+        const hasSubfolders = Array.isArray(response.data) && response.data.length > 0;
+        if (hasSubfolders) {
             subFolders.value = response.data.map(f => ({
                 ...f,
-                has_children: f.has_children
+                has_children: Array.isArray(f.subfolders) ? f.subfolders.length > 0 : !!f.has_children
             }));
             currentFolderId.value = folder.id;
         } else {
