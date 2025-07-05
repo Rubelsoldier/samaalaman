@@ -5,8 +5,8 @@
 - uploading 1 file, causes uploading 2 files. 
 - sometimes folders lost their lft,rgt values, so they are not showing in the tree view. I will fix it later.
 - I want to show the file size in the file list, but it is not showing.
-- 
-
+******* - email verification hole my-files e redirct kora, nahole blank page ese thake.**********************
+- adding favicon 
 ======= To Do ======
 1. Selecting multiple files pressing shift .
 Keeping code to delete files from public folder after a certain time as, they are files for downloading. No need them later

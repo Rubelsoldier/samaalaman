@@ -5,7 +5,7 @@
                    v-model="search"               
                    autocomplete   
                    @keyup.enter.prevent="onSearch"         
-                   placeholder="Search for files and folders"
+                   placeholder="Search for files and folders.."
         />
     </div>
 </template>
