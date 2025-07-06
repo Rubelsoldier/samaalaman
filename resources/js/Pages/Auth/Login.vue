@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
     canResetPassword: {
@@ -27,6 +28,47 @@ const submit = () => {
         onFinish: () => form.reset('password'),
     });
 };
+
+// Clipboard copy functionality with feedback
+
+const copied = ref({ email: false, pass: false });
+
+function copyToClipboard(text, type) {
+    if (
+        typeof navigator !== 'undefined' &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText === 'function'
+    ) {
+        navigator.clipboard.writeText(text).then(() => {
+            copied.value[type] = true;
+            setTimeout(() => {
+                copied.value[type] = false;
+            }, 1200);
+        }).catch(() => {
+            // Optionally handle error
+        });
+    } else {
+        // Fallback for unsupported browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            copied.value[type] = true;
+            setTimeout(() => {
+                copied.value[type] = false;
+            }, 1200);
+        } catch (e) {
+            // Optionally handle error
+        }
+        document.body.removeChild(textarea);
+    }
+}
+
 </script>
 
 <template>
@@ -35,6 +77,22 @@ const submit = () => {
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
             {{ status }}
+        </div>
+
+        Use below credentials to log in to the demo account.
+        <div class="mt-2 mb-2 m-auto w-64">
+            <div class="flex items-center dark:text-gray-400 text-xs">
+                <span>Email: demo-login@saalam.site</span>
+                <button @click="copyToClipboard('demo-login@saalam.site', 'email')" class="ml-2 text-xs underline" title="Copy email">
+                    {{ copied.email ? 'copied' : 'copy' }}
+                </button>
+            </div>
+            <div class="flex items-center dark:text-gray-400 text-xs">
+                <span>Pass: 11111111</span>
+                <button @click="copyToClipboard('11111111', 'pass')" class="ml-2 text-xs underline" title="Copy password">
+                    {{ copied.pass ? 'copied' : 'copy' }}
+                </button>
+            </div>
         </div>
 
         <form @submit.prevent="submit">
