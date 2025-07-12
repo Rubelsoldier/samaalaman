@@ -1,21 +1,26 @@
 <template>
-    <div class="h-screen bg-gray-100 flex w-full gap-4">
+    <div class="h-screen bg-gray-100 flex flex-col sm:flex-row w-full gap-0 sm:gap-4">
         <Navigation />
 
         <main 
             @drop.prevent="handleDrop"
             @dragover.prevent="onDragOver"
             @dragleave.prevent="onDragLeave"
-            class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-100"
-            :class="dragOver ? 'dropzone' : ''">
+            class="flex flex-col flex-1 px-2 sm:px-4 overflow-hidden bg-gray-100 main-tt"
+            :class="dragOver ? 'dropzone' : ''"
+        >
             
             <template v-if="dragOver" class="text-gray-500 text-center py-8 text-sm">
                 Drop files here to upload
             </template>
             <template v-else>
-                <div class="flex items-center justify-between w-full">
-                    <SearchForm/>
-                    <UserSettingsDropdown/>
+                <div class="flex flex-row items-center justify-between w-full gap-2">
+                    <div class="w-auto">
+                        <SearchForm/>
+                    </div>
+                    <div class="w-auto flex justify-end">
+                        <UserSettingsDropdown/>
+                    </div>
                 </div>
                 <div class="flex-1 flex flex-col overflow-hidden">
                     <slot/>

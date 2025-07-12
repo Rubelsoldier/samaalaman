@@ -1,5 +1,5 @@
 <template>
-    <nav class="min-w-[200px] bg-slate-300">
+    <nav class="min-w-[200px] bg-slate-300 navigation-tt">
         <div>
             <Link :href="route('myFiles')" class="h-[80px] px-3 flex items-center gap-3">
                 <!-- <ApplicationLogo
@@ -10,7 +10,7 @@
         </div>
         <div class="px-3">
             <CreateNewDropdown />
-            <div class="py-3">
+            <div class="py-3 flex flex-row flex-wrap gap-2 sm:flex-col sm:gap-0">
                 <NavLink :href="route('myFiles')" :active="$page.props.route_name === 'myFiles'">My Files</NavLink>
                 <NavLink :href="route('file.sharedWithMe')" :active="$page.props.route_name === 'file.sharedWithMe'">Shared with me</NavLink>
                 <NavLink :href="route('file.sharedByMe')" :active="$page.props.route_name === 'file.sharedByMe'">Shared by me</NavLink>

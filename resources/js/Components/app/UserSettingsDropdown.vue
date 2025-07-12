@@ -1,8 +1,8 @@
 <template>
-    <Menu as="div" class="relative inline-block text-left">
+    <Menu as="div" class="relative inline-block text-left w-full max-w-[180px] sm:max-w-none">
         <div>
             <MenuButton
-                class="inline-flex w-full justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-800 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+                class="inline-flex w-full justify-center rounded-md px-3 sm:px-4 py-2 text-sm sm:text-base font-medium text-gray-800 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
             >
                 {{ $page.props.auth.user.name }}
 
@@ -22,7 +22,7 @@
             leave-to-class="transform scale-95 opacity-0"
         >
             <MenuItems
-                class="absolute right-0 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                class="absolute right-0 mt-2 w-40 sm:w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
             >
                 <div class="px-1 py-1">
                     <MenuItem v-slot="{ active }">
