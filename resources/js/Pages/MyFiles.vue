@@ -25,19 +25,58 @@
             </ol>
 
             <div class="flex flex-wrap gap-2 sm:gap-3 items-center mt-2 sm:mt-0">
-                <MoveFiles
-                 :all-selected="allSelected" 
-                 :selected-ids="selectedIds" 
-                 :ancestors="ancestors" 
-                 :selected-file="selectedFile"
-                />
-                <label class="flex items-center mr-2 text-xs sm:text-sm">
-                    Favourites
-                    <Checkbox @change="showOnlyFavourites"  v-model:checked="onlyFavourites" class="ml-2"/>
-                </label>
-                <ShareFilesButton :all-selected="allSelected" :selected-ids="selectedIds" />
-                <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
-                <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @delete="onDelete"/> 
+                <div class="relative sm:mr-24 md:mr-32 lg:mr-40 xl:mr-56">
+                    <button
+                        @click="dropdownOpen = !dropdownOpen"
+                        class="flex items-center gap-2 px-3 py-2 bg-white rounded shadow hover:bg-gray-100 text-xs sm:text-sm justify-center w-full text-center"
+                    >
+                        Actions
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div
+                        v-if="dropdownOpen"
+                        class="absolute z-10 mt-2 left-0 bg-white border rounded shadow-lg flex flex-col gap-2 p-3 text-left"
+                        :class="{
+                            'w-56': $screen('sm'), // desktop width
+                            'w-[90vw] right-1 left-1 text-center': !$screen('sm') // mobile width and center
+                        }"
+                    >
+                        <MoveFiles
+                            :all-selected="allSelected"
+                            :selected-ids="selectedIds"
+                            :ancestors="ancestors"
+                            :selected-file="selectedFile"
+                            class="w-full"
+                            @click="closeDropdown"
+                            @moved="closeDropdown"
+                        />
+                        <label class="flex items-center text-xs sm:text-sm w-full" :class="{'justify-center': !$screen('sm')}" @click="closeDropdown">
+                            Favourites
+                            <Checkbox @change="showOnlyFavourites" v-model:checked="onlyFavourites" class="ml-2"/>
+                        </label>
+                        <ShareFilesButton
+                            :all-selected="allSelected"
+                            :selected-ids="selectedIds"
+                            class="w-full text-center"
+                            @click="closeDropdown"
+                        />
+                        <DownloadFilesButton
+                            :all="allSelected"
+                            :ids="selectedIds"
+                            class="mr-2 w-full text-center"
+                            @click="closeDropdown"
+                        />
+                        <DeleteFilesButton
+                            :delete-all="allSelected"
+                            :delete-ids="selectedIds"
+                            @delete="onDelete"
+                            class="w-full text-center"
+                            @click="closeDropdown"
+                        />
+                    </div>
+                </div>
             </div>
         </nav>
         <!-- breadcumbs | ends  -->
@@ -132,7 +171,7 @@ import FileIcon from '@/Components/app/FileIcon.vue'
 import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import ShareFilesButton from '@/Components/app/ShareFilesButton.vue'
 import MoveFiles from '@/Components/app/MoveFiles.vue';
-import {computed, onMounted, onUpdated, ref} from "vue";
+import { ref, computed, onMounted, onUpdated } from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
 import DownloadFilesButton from '@/Components/app/DownloadFilesButton.vue';
@@ -157,6 +196,7 @@ const selected = ref({});
 const loadMoreIntersect = ref(null)
 const onlyFavourites = ref(false);
 const lastSelectedFileIndex = ref(null);
+const dropdownOpen = ref(false);
 
 const allFiles = ref({
     data: props.files.data,
@@ -195,6 +235,10 @@ function openFolder(file){
         return;
     }
     router.visit(route('myFiles',{folder:file.path}));
+}
+
+function closeDropdown() {
+    dropdownOpen.value = false;
 }
 
 function loadMore(){
@@ -249,9 +293,11 @@ function toggleFileSelect(file, index, event) {
 function onDelete() {
     allSelected.value = false
     selected.value = {}
+    closeDropdown(); // Hide dropdown after delete
 }
 
 function showOnlyFavourites() {
+    closeDropdown(); // Hide dropdown when toggling favourites
     if (onlyFavourites.value) {
         params.set('favourites', 1)
     } else {
@@ -262,6 +308,7 @@ function showOnlyFavourites() {
 
 
 function addRemoveFavourite(file) {
+    closeDropdown(); // Hide dropdown when toggling favourite
 
 httpPost(route('file.addToFavourites'), {id: file.id})
     .then(() => {
@@ -272,6 +319,14 @@ httpPost(route('file.addToFavourites'), {id: file.id})
         console.log(er.error.message);
     })
 }
+
+
+// Add a simple screen size utility for responsive classes
+const $screen = (size) => {
+    if (typeof window === 'undefined') return true;
+    if (size === 'sm') return window.innerWidth >= 640;
+    return false;
+};
 
 
 //Hooks
