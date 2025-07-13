@@ -10,7 +10,10 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -35,7 +38,8 @@ jobs:
           script: |
             cd domains
             cd samaalaman.space
-            git pull
+            git fetch origin master
+            git reset --hard origin/master
             php composer.phar install
             php artisan migrate --force
       - name: Install SSH key
