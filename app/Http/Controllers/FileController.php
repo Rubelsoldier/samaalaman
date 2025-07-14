@@ -87,6 +87,30 @@ class FileController extends Controller
         return Inertia::render('MyFiles', compact('files', 'folder', 'ancestors'));
     }
 
+    public function favourites(Request $request){        
+        $search = $request->get('search');
+
+        $query = File::query()
+            ->select('files.*')
+            ->join('starred_files', 'starred_files.file_id', '=', 'files.id')
+            ->where('starred_files.user_id', Auth::id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('files.created_at', 'desc');
+
+        if ($search) {
+            $query->where('files.name', 'like', "%$search%");
+        }
+
+        $files = $query->paginate(10);
+        $files = FileResource::collection($files);
+
+        if ($request->wantsJson()) {
+            return $files;
+        }
+
+        return Inertia::render('Favourites', compact('files'));
+    }
+
     public function trash(Request $request)
     {
         $search = $request->get('search');
@@ -644,6 +668,37 @@ class FileController extends Controller
                             END
                         WHERE _lft < 0", 
                         [$offset, $offset, $movingNode->id, $data['parent_id']]);
+
+            // --- Update path for moved node and descendants ---
+            // Get the moved node and its descendants
+            $movedNode = File::find($movingNode->id);
+            $descendants = File::where('_lft', '>=', $movedNode->_lft)
+                ->where('_rgt', '<=', $movedNode->_rgt)
+                ->orderBy('_lft')
+                ->get();    
+
+            // Get new parent path
+            $parent = File::find($data['parent_id']);
+            $parentPath = $parent ? $parent->path : '';
+
+            // Update path for moved node and descendants
+            foreach ($descendants as $descendant) {
+                if ($descendant->id == $movedNode->id) {
+                    // Moved node: new path is parent path + '/' + name
+                    $newPath = rtrim($parentPath, '/') . '/' . $descendant->name;
+                } else {
+                    // Descendant: replace old ancestor path with new ancestor path
+                    $oldAncestorPath = $descendant->path;
+                    $relativePath = ltrim(Str::after($descendant->path, $movedNode->path), '/');
+                    $newPath = rtrim($parentPath, '/') . '/' . $movedNode->name;
+                    if ($relativePath) {
+                        $newPath .= '/' . $relativePath;
+                    }
+                }
+                $descendant->path = $newPath;
+                $descendant->save();
+            }
+            // --- end path update ---
 
             DB::commit();
             return redirect()->back();

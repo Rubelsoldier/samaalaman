@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\FileShare;
+use App\Models\StarredFile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Kalnoy\Nestedset\NodeTrait;
@@ -68,10 +70,22 @@ class File extends Model
 
         return $this->save();
     }
-
+    
     public function deleteForever()
     {
+        // Recursively delete children first
+        foreach ($this->children as $child) {
+            $child->deleteForever();
+        }
+
+        // Delete related records for this file
+        FileShare::where('file_id', $this->id)->delete();
+        StarredFile::where('file_id', $this->id)->delete();
+
+        // Delete file from storage
         $this->deleteFilesFromStorage([$this]);
+
+        // Permanently delete the file record
         $this->forceDelete();
     }
 

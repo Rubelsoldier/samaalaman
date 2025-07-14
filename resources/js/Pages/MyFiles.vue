@@ -52,9 +52,13 @@
                             @click="closeDropdown"
                             @moved="closeDropdown"
                         />
-                        <label class="flex items-center text-xs sm:text-sm w-full" :class="{'justify-center': !$screen('sm')}" @click="closeDropdown">
+                        <label class="flex items-center text-xs sm:text-sm w-full" :class="{'justify-center': !$screen('sm')}">
                             Favourites
-                            <Checkbox @change="showOnlyFavourites" v-model:checked="onlyFavourites" class="ml-2"/>
+                            <Checkbox
+                                :checked="onlyFavourites"
+                                @change="(e) => showOnlyFavourites(e.target.checked)"
+                                class="ml-2"
+                            />
                         </label>
                         <ShareFilesButton
                             :all-selected="allSelected"
@@ -116,7 +120,7 @@
                 <td class="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap font-medium text-gray-900 w-[30px] max-w-[30px] pr-0">
                     <Checkbox @click.stop="$event => onSelectCheckboxChange(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected"/>
                 </td>
-                <td class="px-2 sm:px-6 py-2 sm:py-4 max-w-[40px] font-medium text-gray-900 text-yellow-500">
+                <td class="px-2 sm:px-6 py-2 sm:py-4 max-w-[40px] font-medium text-yellow-500">
                     <div @click.stop.prevent="addRemoveFavourite(file)">
                         <svg v-if="!file.is_favourite" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke-width="1.5"
@@ -171,7 +175,7 @@ import FileIcon from '@/Components/app/FileIcon.vue'
 import DeleteFilesButton from '@/Components/app/DeleteFilesButton.vue'
 import ShareFilesButton from '@/Components/app/ShareFilesButton.vue'
 import MoveFiles from '@/Components/app/MoveFiles.vue';
-import { ref, computed, onMounted, onUpdated } from "vue";
+import { ref, computed, onMounted, onUpdated, watch } from "vue";
 import { httpGet , httpPost } from '@/Helper/http-helper';
 import Checkbox from '@/Components/Checkbox.vue';
 import DownloadFilesButton from '@/Components/app/DownloadFilesButton.vue';
@@ -296,16 +300,17 @@ function onDelete() {
     closeDropdown(); // Hide dropdown after delete
 }
 
-function showOnlyFavourites() {
-    closeDropdown(); // Hide dropdown when toggling favourites
+function showOnlyFavourites(val) {    
+    onlyFavourites.value = val;  
+    
     if (onlyFavourites.value) {
         params.set('favourites', 1)
     } else {
         params.delete('favourites')
     }
+    
     router.get(window.location.pathname+'?'+params.toString())
 }
-
 
 function addRemoveFavourite(file) {
     closeDropdown(); // Hide dropdown when toggling favourite
@@ -313,7 +318,13 @@ function addRemoveFavourite(file) {
 httpPost(route('file.addToFavourites'), {id: file.id})
     .then(() => {
         file.is_favourite = !file.is_favourite
-        showSuccessNotification('Selected files have been added to favourites')
+
+        if (file.is_favourite == 1) {
+            showSuccessNotification('Selected files have been added to favourites')
+        } else {
+            showSuccessNotification('Selected file has been removed from favourites')
+        }
+        
     })
     .catch(async (er) => {
         console.log(er.error.message);
